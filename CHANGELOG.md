@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- Fixed Markdown table of contents nodes for skipped heading levels and avoided duplicate tree expansion messages.
+
 ## [8.2.8] - 2026-06-30
 
 ### Fixed

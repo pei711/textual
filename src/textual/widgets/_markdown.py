@@ -1578,13 +1578,14 @@ class MarkdownTableOfContents(Widget, can_focus_children=True):
         root = tree.root
         for level, name, block_id in table_of_contents:
             node = root
-            for _ in range(level - 1):
+            for missing_level in range(1, level):
                 if node._children:
                     node = node._children[-1]
-                    node.expand()
+                    if not node.is_expanded:
+                        node.expand()
                     node.allow_expand = True
                 else:
-                    node = node.add(NUMERALS[level], expand=True)
+                    node = node.add(NUMERALS[missing_level], expand=True)
             node_label = Text.assemble((f"{NUMERALS[level]} ", "dim"), name)
             node.add_leaf(node_label, {"block_id": block_id})
 

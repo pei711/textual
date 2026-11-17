@@ -59,6 +59,40 @@ class MarkdownStringViewerApp(App[None]):
         self.query_one(MarkdownViewer).show_table_of_contents = False
 
 
+class MarkdownTableOfContentsApp(App[None]):
+    """App used to test the Markdown table of contents tree."""
+
+    expanded_nodes: list[str]
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.expanded_nodes = []
+
+    def compose(self) -> ComposeResult:
+        yield MarkdownViewer(
+            "# One\n\n### One point one point one\n\n#### Deeper\n\n## Two"
+        )
+
+    def on_tree_node_expanded(self, event: Tree.NodeExpanded) -> None:
+        self.expanded_nodes.append(str(event.node.label))
+
+
+async def test_markdown_toc_skipped_heading_levels() -> None:
+    """Skipped heading levels have the correct numeral and expand once (issue #6789)."""
+    async with MarkdownTableOfContentsApp().run_test() as pilot:
+        await pilot.pause()
+
+        tree = pilot.app.query_one(MD.MarkdownTableOfContents).query_one(Tree)
+        first_heading = tree.root.children[0]
+        missing_level = first_heading.children[0]
+
+        assert str(missing_level.label) == "Ⅱ"
+        assert pilot.app.expanded_nodes == [
+            "Ⅰ One",
+            "Ⅲ One point one point one",
+        ]
+
+
 @pytest.mark.parametrize("link", [0, 1])
 async def test_markdown_string_viewer_anchor_link(link: int) -> None:
     """Test https://github.com/Textualize/textual/issues/3094
