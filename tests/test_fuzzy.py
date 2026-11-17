@@ -1,5 +1,5 @@
 from textual.content import Span
-from textual.fuzzy import Matcher
+from textual.fuzzy import FuzzySearch, Matcher
 from textual.style import Style
 
 
@@ -7,6 +7,16 @@ def test_no_match():
     """Check non matching score of zero."""
     matcher = Matcher("x")
     assert matcher.match("foo") == 0
+
+
+def test_empty_query():
+    """Regression test for https://github.com/Textualize/textual/issues/6776."""
+    candidate = "Toggle dark mode"
+    matcher = Matcher("")
+
+    assert matcher.match(candidate) == 0
+    assert matcher.highlight(candidate).spans == []
+    assert FuzzySearch().match("", candidate) == (0.0, [])
 
 
 def test_match_single_group():
