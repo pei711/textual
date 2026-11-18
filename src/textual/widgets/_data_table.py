@@ -1466,7 +1466,7 @@ class DataTable(ScrollView, Generic[CellType], can_focus=True):
                 # As we go through the cells, save their rendering, height, and
                 # column width. After we compute the height of the row, go over the cells
                 # that were rendered with the wrong height and append the missing padding.
-                rendered_cells: list[tuple[SegmentLines, int, int]] = []
+                rendered_cells: list[tuple[SegmentLines, int, int, Style]] = []
                 for column_index, column in enumerate(ordered_columns):
                     style = fixed_style if column_index < fixed_columns else row_style
                     cell_location = Coordinate(row_index, column_index)
@@ -1484,16 +1484,25 @@ class DataTable(ScrollView, Generic[CellType], can_focus=True):
                     )
                     cell_height = len(rendered_cell)
                     rendered_cells.append(
-                        (rendered_cell, cell_height, column.get_render_width(self))
+                        (
+                            rendered_cell,
+                            cell_height,
+                            column.get_render_width(self),
+                            style,
+                        )
                     )
                     height = max(height, cell_height)
 
                 row.height = height
                 # Do surgery on the cache for cells that were rendered with the incorrect
                 # height during the first pass.
-                for cell_renderable, cell_height, column_width in rendered_cells:
+                for cell_renderable, cell_height, column_width, style in rendered_cells:
                     if cell_height < height:
-                        first_line_space_style = cell_renderable[0][0].style
+                        first_line_space_style = (
+                            cell_renderable[0][0].style
+                            if cell_renderable and cell_renderable[0]
+                            else style
+                        )
                         cell_renderable.extend(
                             [
                                 [Segment(" " * column_width, first_line_space_style)]

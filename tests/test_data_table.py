@@ -1364,6 +1364,20 @@ async def test_add_row_auto_height(cell: RenderableType, height: int):
         assert row.height == height
 
 
+async def test_add_row_auto_height_with_zero_width_cell():
+    """Regression test for https://github.com/Textualize/textual/issues/6769."""
+    app = DataTableApp()
+    async with app.run_test() as pilot:
+        table = app.query_one(DataTable)
+        table.cell_padding = 0
+        table.add_column("A", width=0)
+        table.add_column("B")
+        row_key = table.add_row("x", "two\nlines", height=None)
+        row = table.rows.get(row_key)
+        await pilot.pause()
+        assert row.height == 2
+
+
 async def test_add_row_expands_column_widths():
     """Regression test for https://github.com/Textualize/textual/issues/1026."""
     app = DataTableApp()
