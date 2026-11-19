@@ -81,7 +81,9 @@ class StreamLayout(Layout):
             y += top if top > previous_margin else previous_margin
             previous_margin = bottom
             height = (
-                widget.get_content_height(size, viewport, width - gutter_width)
+                widget.get_content_height(
+                    size, viewport, width - (left + right) - gutter_width
+                )
                 + gutter_height
             )
             if (max_height := styles.max_height) is not None and max_height.is_cells:

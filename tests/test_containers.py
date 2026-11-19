@@ -119,3 +119,28 @@ async def test_scrollbar_zero_thickness():
     app = ScrollbarZero()
     async with app.run_test(size=(8, 6)):
         pass
+
+
+async def test_stream_layout_measures_with_horizontal_margins():
+    """Ensure stream children are measured at their width after margins are applied."""
+
+    class StreamMarginApp(App[None]):
+        CSS = """
+        VerticalScroll {
+            layout: stream;
+            scrollbar-size-vertical: 0;
+        }
+        Static {
+            margin: 0 1;
+        }
+        """
+
+        def compose(self) -> ComposeResult:
+            with VerticalScroll():
+                yield Label("x" * 36 + " end")
+
+    app = StreamMarginApp()
+    async with app.run_test(size=(40, 10)):
+        label = app.query_one(Label)
+        assert label.region.width == 38
+        assert label.region.height == 2
