@@ -89,3 +89,39 @@ async def test_headings_that_look_like_they_contain_markup(text: str) -> None:
         toc_label = toc_tree.root.children[0].label
         _, text_label = toc_label.divide([2])
         assert text_label == Text(text)
+
+
+async def test_table_of_contents_skipped_heading_levels() -> None:
+    """Test https://github.com/Textualize/textual/issues/6789."""
+
+    document = """\
+# One
+
+### One point one point one
+
+#### Deeper
+
+## Two
+"""
+
+    class TocApp(App[None]):
+        def __init__(self) -> None:
+            super().__init__()
+            self.expanded: list[str] = []
+
+        def compose(self) -> ComposeResult:
+            yield MarkdownViewer(document)
+
+        def on_tree_node_expanded(self, event: Tree.NodeExpanded) -> None:
+            self.expanded.append(str(event.node.label))
+
+    async with TocApp().run_test() as pilot:
+        await pilot.pause()
+        toc_tree = pilot.app.query_one(MD.MarkdownTableOfContents).query_one(Tree)
+        first_heading = toc_tree.root.children[0]
+        missing_level = first_heading.children[0]
+        third_heading = missing_level.children[0]
+
+        assert str(missing_level.label) == "Ⅱ"
+        assert [str(node.label) for node in third_heading.children] == ["Ⅳ Deeper"]
+        assert pilot.app.expanded == ["Ⅰ One", "Ⅲ One point one point one"]
