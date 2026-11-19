@@ -1893,13 +1893,14 @@ TextArea {
         """
         # The longest number in the gutter plus two extra characters: `│ `.
         gutter_margin = 2
-        gutter_width = (
-            len(str(self.document.line_count - 1 + self.line_number_start))
-            + gutter_margin
-            if self.show_line_numbers
-            else 0
+        if not self.show_line_numbers:
+            return 0
+
+        first_line_number = self.line_number_start
+        last_line_number = first_line_number + self.document.line_count - 1
+        return (
+            max(len(str(first_line_number)), len(str(last_line_number))) + gutter_margin
         )
-        return gutter_width
 
     def _on_mount(self, event: events.Mount) -> None:
         def text_selection_started(screen: Screen) -> None:
