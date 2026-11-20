@@ -169,6 +169,21 @@ async def test_datatable_message_emission():
         assert app.message_names == expected_messages
 
 
+async def test_disabled_datatable_with_empty_row_label():
+    """Regression test for https://github.com/Textualize/textual/issues/6768."""
+
+    class DisabledTableApp(App):
+        def compose(self) -> ComposeResult:
+            yield DataTable(disabled=True, cell_padding=0)
+
+    app = DisabledTableApp()
+    async with app.run_test() as pilot:
+        table = app.query_one(DataTable)
+        table.add_column("A")
+        table.add_row("x", label="")
+        await pilot.pause()
+
+
 async def test_empty_table_interactions():
     app = DataTableApp()
     async with app.run_test() as pilot:

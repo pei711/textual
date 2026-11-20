@@ -1,4 +1,4 @@
-from typing import Iterable, cast
+from typing import Iterable, Optional, cast
 
 from rich.segment import Segment
 from rich.style import Style
@@ -25,8 +25,12 @@ def _apply_opacity(
     from_rich_color = Color.from_rich_color
     from_color = Style.from_color
     blend = base_background.blend
-    styled_segments = cast("Iterable[tuple[str, Style, object]]", segments)
+    styled_segments = cast("Iterable[tuple[str, Optional[Style], object]]", segments)
     for text, style, _ in styled_segments:
+        if style is None:
+            yield _Segment(text, style)
+            continue
+
         blended_style = style
 
         if style.color is not None:
